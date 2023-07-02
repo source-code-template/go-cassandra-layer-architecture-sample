@@ -7,7 +7,7 @@ import (
 )
 
 type UserService interface {
-	All(ctx context.Context) (*[]User, error)
+	All(ctx context.Context) ([]User, error)
 	Load(ctx context.Context, id string) (*User, error)
 	Create(ctx context.Context, user *User) (int64, error)
 	Update(ctx context.Context, user *User) (int64, error)
