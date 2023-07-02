@@ -3,7 +3,13 @@
 
 <mapper namespace="mappers">
   <select id="user">
-    select *
+    select
+    <if test="fields != null">
+      ${fields}
+    </if>
+    <if test="fields == null">
+      *
+    </if>
     from users
     where
     <if test="id != null">
@@ -24,9 +30,10 @@
     <if test="phone != null">
       phone like #{phone} and
     </if>
-    1 = 1
+    id > ''
     <if test="sort != null">
-      order by {sort}
+      order by ${sort}
     </if>
+    allow filtering
   </select>
 </mapper>
