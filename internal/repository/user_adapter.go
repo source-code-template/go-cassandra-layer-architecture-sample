@@ -24,13 +24,10 @@ type UserAdapter struct {
 
 func NewUserRepository(db *gocql.ClusterConfig, templates map[string]*template.Template) (*UserAdapter, error) {
 	userType := reflect.TypeOf(User{})
-	jsonColumnMap := q.MakeJsonColumnMap(userType)
-	keys, _ := q.FindPrimaryKeys(userType)
-	fieldsIndex, err := q.GetColumnIndexes(userType)
+	fieldsIndex, schema, jsonColumnMap, keys, _, err := q.Init(userType)
 	if err != nil {
 		return nil, err
 	}
-	schema := q.CreateSchema(userType)
 	return &UserAdapter{Cluster: db, ModelType: userType, JsonColumnMap: jsonColumnMap, Keys: keys, Schema: schema, FieldsIndex: fieldsIndex, templates: templates}, nil
 }
 
@@ -71,10 +68,7 @@ func (m *UserAdapter) Create(ctx context.Context, user *User) (int64, error) {
 	}
 	query, params := q.BuildToInsert("users", user, m.Schema)
 	err = session.Query(query, params...).Exec()
-	if err != nil {
-		return -1, nil
-	}
-	return 1, nil
+	return 1, err
 }
 
 func (m *UserAdapter) Update(ctx context.Context, user *User) (int64, error) {
@@ -84,10 +78,7 @@ func (m *UserAdapter) Update(ctx context.Context, user *User) (int64, error) {
 	}
 	query, params := q.BuildToUpdate("users", user, m.Schema)
 	err = session.Query(query, params...).Exec()
-	if err != nil {
-		return -1, err
-	}
-	return 1, nil
+	return 1, err
 }
 
 func (m *UserAdapter) Patch(ctx context.Context, user map[string]interface{}) (int64, error) {
@@ -98,10 +89,7 @@ func (m *UserAdapter) Patch(ctx context.Context, user map[string]interface{}) (i
 		return 0, err
 	}
 	err = session.Query(query, args...).Exec()
-	if err != nil {
-		return -1, err
-	}
-	return 1, nil
+	return 1, err
 }
 
 func (m *UserAdapter) Delete(ctx context.Context, id string) (int64, error) {
@@ -111,10 +99,7 @@ func (m *UserAdapter) Delete(ctx context.Context, id string) (int64, error) {
 	}
 	query := "delete from users where id = ?"
 	err = session.Query(query, id).Exec()
-	if err != nil {
-		return -1, err
-	}
-	return 1, nil
+	return 1, err
 }
 
 func (m *UserAdapter) Search(ctx context.Context, filter *UserFilter) ([]User, string, error) {

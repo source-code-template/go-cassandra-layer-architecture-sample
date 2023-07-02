@@ -30,8 +30,8 @@ github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869 h1:DDGfHa7BWjL4Yn
 github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dRnpXw/yCqJaO+ZrUyxD+3VXMFFr56k5XYrpB4=
 github.com/cespare/xxhash v1.1.0/go.mod h1:XrSqR1VqqWfGrhpAt58auRo0WTKS1nRRg3ghfAqPWnc=
 github.com/client9/misspell v0.3.4/go.mod h1:qj6jICC3Q7zFZvVWo7KLAzC3yx5G7kyvSDkc90ppPyw=
-github.com/core-go/cassandra v0.0.11 h1:ZtTse6S2PDhXLD2lXOnNFxZsLU+2ESTUd2UqSbtV5kc=
-github.com/core-go/cassandra v0.0.11/go.mod h1:dOwyRp8nSrOGdydc/Gw7Q+AJfaNbJDfGxwILwOA908s=
+github.com/core-go/cassandra v0.0.12 h1:4Gl/TmNI4cZ4UzTFl2VpphJdib0FcYd9oPgmOU5WDw0=
+github.com/core-go/cassandra v0.0.12/go.mod h1:dOwyRp8nSrOGdydc/Gw7Q+AJfaNbJDfGxwILwOA908s=
 github.com/core-go/config v0.1.0 h1:PT9t/UrhNFo5tB0s45Ed99R6Lx3ibRwA2SdjNjbRCA0=
 github.com/core-go/config v0.1.0/go.mod h1:Pqxosu8ryByLKWyV6tDiwY+JAJc+YSlFy6MzQRFDO+g=
 github.com/core-go/core v0.3.5 h1:mn9rQCuZBAkO4BbfiDdtfACXQb31eRoAJT82N2PVw1o=
