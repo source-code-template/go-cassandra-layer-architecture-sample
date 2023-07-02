@@ -36,10 +36,11 @@ func (m *UserAdapter) All(ctx context.Context) ([]User, error) {
 	if err != nil {
 		return nil, err
 	}
-	query := "select * from users"
+	defer session.Close()
+	query := "select id, username, email, phone, date_of_birth from users"
 	rows := session.Query(query).Iter()
 	var users []User
-	err = q.ScanIter(rows, users, m.FieldsIndex)
+	err = q.ScanIter(rows, &users, m.FieldsIndex)
 	return users, err
 }
 
@@ -48,10 +49,11 @@ func (m *UserAdapter) Load(ctx context.Context, id string) (*User, error) {
 	if err != nil {
 		return nil, err
 	}
-	query := session.Query("select * from users where id = ?", id)
+	defer session.Close()
+	query := session.Query("select id, username, email, phone, date_of_birth from users where id = ?", id)
 	rows := query.Iter()
 	var users []User
-	err = q.ScanIter(rows, users, m.FieldsIndex)
+	err = q.ScanIter(rows, &users, m.FieldsIndex)
 	if err != nil {
 		return nil, err
 	}
@@ -66,6 +68,7 @@ func (m *UserAdapter) Create(ctx context.Context, user *User) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer session.Close()
 	query, params := q.BuildToInsert("users", user, m.Schema)
 	err = session.Query(query, params...).Exec()
 	return 1, err
@@ -76,6 +79,7 @@ func (m *UserAdapter) Update(ctx context.Context, user *User) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer session.Close()
 	query, params := q.BuildToUpdate("users", user, m.Schema)
 	err = session.Query(query, params...).Exec()
 	return 1, err
@@ -88,6 +92,7 @@ func (m *UserAdapter) Patch(ctx context.Context, user map[string]interface{}) (i
 	if err != nil {
 		return 0, err
 	}
+	defer session.Close()
 	err = session.Query(query, args...).Exec()
 	return 1, err
 }
@@ -97,6 +102,7 @@ func (m *UserAdapter) Delete(ctx context.Context, id string) (int64, error) {
 	if err != nil {
 		return 0, err
 	}
+	defer session.Close()
 	query := "delete from users where id = ?"
 	err = session.Query(query, id).Exec()
 	return 1, err
@@ -113,6 +119,7 @@ func (m *UserAdapter) Search(ctx context.Context, filter *UserFilter) ([]User, s
 	if err != nil {
 		return users, "", err
 	}
+	defer session.Close()
 	nextPageToken, err := q.QueryWithPage(session, m.FieldsIndex, &users, query, params, int(filter.Limit), filter.NextPageToken)
 	return users, nextPageToken, err
 }
