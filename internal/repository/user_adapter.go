@@ -2,6 +2,7 @@ package repository
 
 import (
 	"context"
+	"fmt"
 	q "github.com/core-go/cassandra"
 	"github.com/core-go/search/convert"
 	"github.com/core-go/search/template"
@@ -18,17 +19,18 @@ type UserAdapter struct {
 	JsonColumnMap map[string]string
 	Keys          []string
 	FieldsIndex   map[string]int
+	Fields        string
 	Schema        *q.Schema
 	templates     map[string]*template.Template
 }
 
 func NewUserRepository(db *gocql.ClusterConfig, templates map[string]*template.Template) (*UserAdapter, error) {
 	userType := reflect.TypeOf(User{})
-	fieldsIndex, schema, jsonColumnMap, keys, _, err := q.Init(userType)
+	fieldsIndex, schema, jsonColumnMap, keys, _, fields, err := q.Init(userType)
 	if err != nil {
 		return nil, err
 	}
-	return &UserAdapter{Cluster: db, ModelType: userType, JsonColumnMap: jsonColumnMap, Keys: keys, Schema: schema, FieldsIndex: fieldsIndex, templates: templates}, nil
+	return &UserAdapter{Cluster: db, ModelType: userType, JsonColumnMap: jsonColumnMap, Keys: keys, Schema: schema, Fields: fields, FieldsIndex: fieldsIndex, templates: templates}, nil
 }
 
 func (m *UserAdapter) All(ctx context.Context) ([]User, error) {
@@ -37,7 +39,7 @@ func (m *UserAdapter) All(ctx context.Context) ([]User, error) {
 		return nil, err
 	}
 	defer session.Close()
-	query := "select id, username, email, phone, date_of_birth from users"
+	query := fmt.Sprintf("select %s from users", m.Fields)
 	rows := session.Query(query).Iter()
 	var users []User
 	err = q.ScanIter(rows, &users, m.FieldsIndex)
@@ -50,7 +52,7 @@ func (m *UserAdapter) Load(ctx context.Context, id string) (*User, error) {
 		return nil, err
 	}
 	defer session.Close()
-	query := session.Query("select id, username, email, phone, date_of_birth from users where id = ?", id)
+	query := session.Query(fmt.Sprintf("select %s from users where id = ?", m.Fields), id)
 	rows := query.Iter()
 	var users []User
 	err = q.ScanIter(rows, &users, m.FieldsIndex)
@@ -114,12 +116,12 @@ func (m *UserAdapter) Search(ctx context.Context, filter *UserFilter) ([]User, s
 		return users, "", nil
 	}
 	ftr := convert.ToMap(filter, &m.ModelType)
-	query, params := c.Build(ftr, *m.templates["user"], q.BuildParam)
+	query, params := c.Build(ftr, *m.templates["user"])
 	session, err := m.Cluster.CreateSession()
 	if err != nil {
 		return users, "", err
 	}
 	defer session.Close()
-	nextPageToken, err := q.QueryWithPage(session, m.FieldsIndex, &users, query, params, int(filter.Limit), filter.NextPageToken)
+	nextPageToken, err := q.QueryWithPage(session, m.FieldsIndex, &users, filter.Limit, filter.Next, query, params...)
 	return users, nextPageToken, err
 }
