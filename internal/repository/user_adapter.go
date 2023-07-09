@@ -115,7 +115,7 @@ func (m *UserAdapter) Search(ctx context.Context, filter *UserFilter) ([]User, s
 	if filter.Limit <= 0 {
 		return users, "", nil
 	}
-	ftr := convert.ToMap(filter, &m.ModelType)
+	ftr := convert.ToMapWithFields(filter, m.Fields, &m.ModelType)
 	query, params := c.Build(ftr, *m.templates["user"])
 	session, err := m.Cluster.CreateSession()
 	if err != nil {
